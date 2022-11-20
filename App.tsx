@@ -2,10 +2,12 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
+import WeatherInfo from "./components/WeatherInfo";
 
 export default function App() {
 	const [errMsg, setErrMsg] = useState("");
 	const [currentWeather, setCurrentWeather] = useState();
+	const [unitsSystem, setUnitsSystem] = useState("metric");
 
 	const load = async () => {
 		try {
@@ -20,7 +22,7 @@ export default function App() {
 
 			const { longitude, latitude } = location.coords;
 
-			const weatherUrl = `${process.env.BASE_WEATHER_URL}lat=${latitude}&lon=${longitude}&appid=${process.env.WEATHER_API_KEY}`;
+			const weatherUrl = `${process.env.BASE_WEATHER_URL}lat=${latitude}&lon=${longitude}&units=${unitsSystem}&appid=${process.env.WEATHER_API_KEY}`;
 
 			const response = await fetch(weatherUrl);
 
@@ -31,8 +33,8 @@ export default function App() {
 			} else {
 				setErrMsg(result.message);
 			}
-		} catch (err) {
-			console.log(err);
+		} catch (err: any) {
+			setErrMsg(err.message);
 		}
 	};
 
@@ -40,9 +42,18 @@ export default function App() {
 		load();
 	}, []);
 
+	if (currentWeather) {
+		return (
+			<View style={styles.container}>
+				<WeatherInfo currentWeather={currentWeather} />
+				<StatusBar style="auto" />
+			</View>
+		);
+	}
+
 	return (
 		<View style={styles.container}>
-			<Text>Open up App.tsx to start working on your app!</Text>
+			<Text>{errMsg}</Text>
 			<StatusBar style="auto" />
 		</View>
 	);
